@@ -13,14 +13,15 @@ import com.spotify.sdk.android.player.*
 class App : AppCompatActivity(), SpotifyPlayer.InitializationObserver, ConnectionStateCallback, Player.NotificationCallback {
 
     private val SPOTIFY_ERROR: String = "Spotify Player Error: "
+    private val SPOTIFY_SUCCESS: String = "Spotify Player OK: "
+    private val SPOTIFY_STATUS: String = "Spotify Player Status: "
     private val CLIENT_ID: String = "0f50240f0ff642e29b57e31c9ae5a937"
-    private val REDIRECT_URI:String = "data.dump"
+    private val REDIRECT_URI:String = "spotidumpdata.com://callback"
     private val REQUEST_CODE = 1337
 
-    private var player: Player? = null
-
     companion object {
-        var instance: App? = null
+        lateinit var instance: App
+        lateinit var player: Player
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +33,7 @@ class App : AppCompatActivity(), SpotifyPlayer.InitializationObserver, Connectio
                 AuthenticationResponse.Type.TOKEN,
                 REDIRECT_URI)
 
-        val scopes = listOf("teste", "teste").toTypedArray()
+        val scopes = listOf("user-read-private", "streaming").toTypedArray()
 
         builder.setScopes(scopes)
 
@@ -41,6 +42,11 @@ class App : AppCompatActivity(), SpotifyPlayer.InitializationObserver, Connectio
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request)
 
         ApiClient.request()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Spotify.destroyPlayer(this);
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -59,11 +65,9 @@ class App : AppCompatActivity(), SpotifyPlayer.InitializationObserver, Connectio
                     }
 
                     override fun onInitialized(spotifyPlayer: SpotifyPlayer?) {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-
-                        var player: SpotifyPlayer? = spotifyPlayer
-                        player?.addConnectionStateCallback(App.instance)
-                        player?.addNotificationCallback(App.instance)
+                        player = spotifyPlayer!!
+                        player.addConnectionStateCallback(App.instance)
+                        player.addNotificationCallback(App.instance)
                     }
 
                 })
@@ -76,39 +80,42 @@ class App : AppCompatActivity(), SpotifyPlayer.InitializationObserver, Connectio
 
     override fun onError(p0: Throwable?) {
         println(p0!!.message)
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun onLoggedOut() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        Log.d(SPOTIFY_STATUS, "User logged out");
     }
 
     override fun onLoggedIn() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        Log.d(SPOTIFY_SUCCESS,"User logged in")
+
+        player.playUri(null,"spotify:track:3Ipgo2twyvBySMwsTzunlH", 0, 0)
     }
 
     override fun onConnectionMessage(p0: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun onLoginFailed(p0: Error?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun onTemporaryError() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
 
     override fun onPlaybackError(p0: Error?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        Log.d(SPOTIFY_ERROR, p0!!.name)
     }
 
     override fun onPlaybackEvent(p0: PlayerEvent?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        Log.d(SPOTIFY_STATUS, p0!!.name)
+
     }
 
     override fun onInitialized(p0: SpotifyPlayer?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 }
