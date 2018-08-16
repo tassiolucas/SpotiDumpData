@@ -3,8 +3,17 @@ package data.dump.model.realm
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 
-class User : RealmObject() {
+open class User(
+        @PrimaryKey
+        var _id:Int? = null,
+        var token: String? = null
+) : RealmObject() {
 
-    lateinit var token: String
+        fun User() {}
+
+        fun User (token: String) {
+                this._id = 1
+                this.token = token
+        }
 
 }

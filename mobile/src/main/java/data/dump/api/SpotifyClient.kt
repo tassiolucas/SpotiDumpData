@@ -14,39 +14,48 @@ class SpotifyClient : SpotifyPlayer.InitializationObserver, ConnectionStateCallb
     private val SPOTIFY_ERROR: String = "Spotify Player Error: "
     private val SPOTIFY_SUCCESS: String = "Spotify Player OK: "
     private val SPOTIFY_STATUS: String = "Spotify Player Status: "
-    private val CLIENT_ID: String = "0f50240f0ff642e29b57e31c9ae5a937"
-    private val REDIRECT_URI:String = "spotidumpdata.com://callback"
-    private val REQUEST_CODE = 1337
+
 
     companion object {
-        lateinit var intance: SpotifyClient
+        private val CLIENT_ID: String = "0f50240f0ff642e29b57e31c9ae5a937"
+        private val REDIRECT_URI:String = "spotidumpdata.com://callback"
+        private val REQUEST_AUTH_CODE = 1337
+
+        private val SPOTIFY_ERROR: String = "Spotify Player Error: "
+
+        var instance: SpotifyClient
         lateinit var player: Player
-    }
 
-    fun requestAuthentication(context: Activity) {
-        val builder: AuthenticationRequest.Builder = AuthenticationRequest.Builder(CLIENT_ID,
-                AuthenticationResponse.Type.TOKEN,
-                REDIRECT_URI)
+        init {
+            instance = SpotifyClient()
+            Log.d("NEW SPOTIFY CLIENT: ", "Criando novo cliente do Spotify!")
+        }
 
-        val scopes = listOf("user-read-private", "streaming").toTypedArray()
+        fun getUserToken(requestCode: Int, resultCode: Int, intent: Intent): String {
+            var token: String = ""
+            var saved: Boolean = false
 
-        builder.setScopes(scopes)
-
-        var request: AuthenticationRequest = builder.build()
-
-        AuthenticationClient.openLoginActivity(context, REQUEST_CODE, request)
-
-        ApiClient.request()
-    }
-
-    fun saveUserToken(requestCode: Int, resultCode: Int, intent: Intent) {
-        if (requestCode == REQUEST_CODE) {
-            val response: AuthenticationResponse = AuthenticationClient.getResponse(resultCode, intent)
-            if (response.type == AuthenticationResponse.Type.TOKEN) {
-
-            } else if (response.type == AuthenticationResponse.Type.ERROR) {
-                Log.d(SPOTIFY_ERROR, response.error)
+            if (requestCode == REQUEST_AUTH_CODE) {
+                val response: AuthenticationResponse = AuthenticationClient.getResponse(resultCode, intent)
+                if (response.type == AuthenticationResponse.Type.TOKEN) {
+                    token = response.accessToken
+                } else if (response.type == AuthenticationResponse.Type.ERROR) {
+                    Log.d(SPOTIFY_ERROR, response.error)
+                } else if (response.type == AuthenticationResponse.Type.EMPTY) {
+                    Log.d(SPOTIFY_ERROR, response.state)
+                }
             }
+            return token
+        }
+
+        fun requestAuthenticationScreen(context: Activity) {
+            val builder: AuthenticationRequest.Builder = AuthenticationRequest.Builder(CLIENT_ID,
+                    AuthenticationResponse.Type.TOKEN,
+                    REDIRECT_URI)
+            val scopes = listOf("user-read-private", "streaming").toTypedArray()
+            builder.setScopes(scopes)
+            var request: AuthenticationRequest = builder.build()
+            AuthenticationClient.openLoginActivity(context, REQUEST_AUTH_CODE, request)
         }
     }
 
@@ -62,8 +71,8 @@ class SpotifyClient : SpotifyPlayer.InitializationObserver, ConnectionStateCallb
 
             override fun onInitialized(spotifyPlayer: SpotifyPlayer?) {
                 player = spotifyPlayer!!
-                player!!.addConnectionStateCallback(this@SpotifyClient)
-                player!!.addNotificationCallback(this@SpotifyClient)
+                player.addConnectionStateCallback(this@SpotifyClient)
+                player.addNotificationCallback(this@SpotifyClient)
             }
         })
     }
@@ -73,13 +82,13 @@ class SpotifyClient : SpotifyPlayer.InitializationObserver, ConnectionStateCallb
     }
 
     override fun onLoggedOut() {
-        Log.d(SPOTIFY_STATUS, "User logged out");
+        Log.d(SPOTIFY_STATUS, "User logged out")
     }
 
     override fun onLoggedIn() {
         Log.d(SPOTIFY_SUCCESS,"User logged in")
 
-        player.playUri(null,"spotify:track:3Ipgo2twyvBySMwsTzunlH", 0, 0)
+        player.playUri(null,"spotify:track:74uC8K6i7AL7mC7ohKCS7d", 0, 0)
     }
 
     override fun onConnectionMessage(p0: String?) {

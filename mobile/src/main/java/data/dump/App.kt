@@ -1,29 +1,29 @@
 package data.dump
 
-import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
-import com.spotify.sdk.android.player.*
+import android.app.Application
+import android.content.Context
 import data.dump.api.SpotifyClient
+import io.realm.Realm
+import io.realm.RealmConfiguration
 
-class App : AppCompatActivity() {
+class App : Application() {
 
     companion object {
         lateinit var instance: App
+        lateinit var context: Context
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate() {
+        super.onCreate()
         instance = this
-        setContentView(R.layout.activity_principal)
+        context = applicationContext
 
-        SpotifyClient.intance.requestAuthentication(this)
-
-        // TODO: Criar estrutura Realm para salvar token
-        //SpotifyClient.intance.saveUserToken()
+        Realm.init(this)
+        val config: RealmConfiguration = RealmConfiguration.Builder()
+                .name("SpotiDumpDataBase.realm")
+                .deleteRealmIfMigrationNeeded()
+                .build()
+        Realm.setDefaultConfiguration(config)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Spotify.destroyPlayer(this);
-    }
 }
