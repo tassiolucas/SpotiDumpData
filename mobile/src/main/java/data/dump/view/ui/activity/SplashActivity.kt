@@ -3,6 +3,7 @@ package data.dump.view.ui.activity
 import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import butterknife.ButterKnife
 import data.dump.R
@@ -32,8 +33,13 @@ class SplashActivity: BaseActivity() {
 
         } else {
             Toast.makeText(this, "Você precisa logar antes iniciar.", Toast.LENGTH_SHORT)
-            SpotifyClient.instance.requestAuthenticationScreen(this)
+            SpotifyClient.requestAuthenticationScreen(this)
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        println("Nova intent!")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -48,7 +54,4 @@ class SplashActivity: BaseActivity() {
         }
 
     }
-
-
-
 }

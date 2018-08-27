@@ -4,10 +4,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.spotify.sdk.android.player.*
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
-import com.spotify.sdk.android.player.*
+import com.spotify.sdk.android.player.Config
+import com.spotify.sdk.android.player.ConnectionStateCallback
+import com.spotify.sdk.android.player.Player
+import com.spotify.sdk.android.player.Spotify
 
 class SpotifyClient : SpotifyPlayer.InitializationObserver, ConnectionStateCallback, Player.NotificationCallback {
 
@@ -18,7 +22,7 @@ class SpotifyClient : SpotifyPlayer.InitializationObserver, ConnectionStateCallb
 
     companion object {
         private val CLIENT_ID: String = "0f50240f0ff642e29b57e31c9ae5a937"
-        private val REDIRECT_URI:String = "spotidumpdata.com://callback"
+        private val REDIRECT_URI:String = "https://spoti-dump-data/callback/"
         private val REQUEST_AUTH_CODE = 1337
 
         private val SPOTIFY_ERROR: String = "Spotify Player Error: "
@@ -42,7 +46,8 @@ class SpotifyClient : SpotifyPlayer.InitializationObserver, ConnectionStateCallb
                 } else if (response.type == AuthenticationResponse.Type.ERROR) {
                     Log.d(SPOTIFY_ERROR, response.error)
                 } else if (response.type == AuthenticationResponse.Type.EMPTY) {
-                    Log.d(SPOTIFY_ERROR, response.state)
+                    println(response.error)
+                    println(response.state)
                 }
             }
             return token
@@ -52,7 +57,7 @@ class SpotifyClient : SpotifyPlayer.InitializationObserver, ConnectionStateCallb
             val builder: AuthenticationRequest.Builder = AuthenticationRequest.Builder(CLIENT_ID,
                     AuthenticationResponse.Type.TOKEN,
                     REDIRECT_URI)
-            val scopes = listOf("user-read-private", "streaming").toTypedArray()
+            val scopes: Array<String>  = arrayOf("user-read-private", "streaming")
             builder.setScopes(scopes)
             var request: AuthenticationRequest = builder.build()
             AuthenticationClient.openLoginActivity(context, REQUEST_AUTH_CODE, request)
